@@ -21,19 +21,286 @@
 
 class: center, middle
 
-# Title
+# From Network primitives to hipster service Meshing
+
 
 ---
 
-# Agenda
+Almost every production problem you'll see in a kubernetes cluster
+happens at the network level.
 
-1. Introduction
-2. Deep-dive
-3. https://cloudnativelabs.github.io/post/2017-05-10-kube-network-service-proxy/
+- DOS (accidental or malicious)
+- Node flapping (netsplits, too many iptables, node check-in stability)
+- Flakey loadbalancing (some machine nodeports respond slowly)
+- Lack of health checks (loadbalancing to unhealthy pods)
+
+Agenda:
+
+# TCP dump: Baseline w/ docker0
+
+- IPtables: Baseline w/ docker0
+- Installing kube from source w/ crio
+- Confirming that kube-proxy is doing "the right thing"
+- Looking at how IP tables rules are maintained by kube-proxy
+- Istio on a local up cluster.
+
 
 ---
 
-# Introduction
+TCP Dump !
+
+```
+docker run -p 8080:80 --name webserv1 -d nginx
+```
+
+Meanwhile, check out available devices with `tcpdump -D`
+
+Now curl it...
+
+```
+tcpdump -i docker0
+```
+
+```
+13:09:41.352829 IP localhost.localdomain.53344 > 172.17.0.2.http: Flags [.], ack 1, win 229, options [nop,nop,TS val 549499683 ecr 4013716271], length 0
+13:09:41.354038 IP localhost.localdomain.53344 > 172.17.0.2.http: Flags [P.], seq 1:79, ack 1, win 229, options [nop,nop,TS val 549499684 ecr 4013716271], length 78: HTTP: GET / HTTP/1.1
+13:09:41.354057 IP 172.17.0.2.http > localhost.localdomain.53344: Flags [.], ack 79, win 227, options [nop,nop,TS val 4013716272 ecr 549499684], length 0
+13:09:46.732914 ARP, Request who-has localhost.localdomain tell 172.17.0.2, length 28
+```
+
+In kube: A flood of "SYN" packets on a device with no "ACK", implies that
+possibly an iptables or hypervisor level filtering rule is preventing anything
+productive from happening.
+
+
+---
+
+IPTables
+
+Keeping the nginx container running... Try doing a
+
+```
+iptables-save
+```
+
+
+---
+
+
+Check out the  rules (ABBREVIATED)
+
+```
+*filter
+:FORWARD DROP [0:0]
+:DOCKER - [0:0]
+:DOCKER-ISOLATION - [0:0]
+-A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A DOCKER -d 172.17.0.2/32 ! -i docker0 -o docker0 -p tcp -m tcp --dport 80 -j ACCEPT
+-A DOCKER-ISOLATION -j RETURN
+```
+
+Now, Looking outside the filter table, the DOCKER chain has a couple of interesting
+rules.
+
+If your headed to port 8080 and your not coming from inside docker, change the
+destination to that of the actual docker container running nginx on 80:
+
+`-A DOCKER ! -i docker0 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 172.17.0.2:80`
+
+If your coming from nginx,
+`-A POSTROUTING -s 172.17.0.2/32 -d 172.17.0.2/32 -p tcp -m tcp --dport 80 -j MASQUERADE`
+
+--- ****************************************************************************
+
+WAIT ! Some of us don't know the difference between L3, L4 and L7.
+
+---
+
+### [ Host ]  OSI
+
+Two layer 7's:
+
+- Your App.
+- hostname based loadbalancers.
+- Internet entities: JPEG,GIF,HTTPS,SSL,TLS: Ways to group packets into meaningful, securely
+accessible entities.
+And of course...
+
+- Ports!  TCP sessions, Sockets establishment: Ways to structure the long term
+exchange of datagrams between two actors.
+That stuff has to occur at the host level.
+
+### [ network ] OSI
+
+- Datagrams: Groups of IP based information that is routed / multiplexed as needed
+to support sophisticated 2 way communication.
+- IP addresses! addresses for groups of bits being sent to locations along the wire.
+- Cables and pipes: groups of bits that are reliably transferred
+- Electricity: bit over a wire
+
+---
+
+# Cloud Native Buzzwordy part: Running Kube from source
+```
+yum install -y rsync
+```
+
+Setup CRIO `dnf install crio; dnf install conntrack`
+
+```
+mkdir ~/bin/
+curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+chmod +x ~/bin/gimme
+curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+chmod +x ~/bin/gimme
+~/bin/gimme 1.11.1
+unset GOOS;
+unset GOARCH;
+export GOROOT='/root/.gimme/versions/go1.11.1.linux.amd64';
+export PATH="/root/.gimme/versions/go1.11.1.linux.amd64/bin:${PATH}";
+```
+
+---
+
+# CRIO
+Set crio hints for hack local up cluster:
+
+```
+CGROUP_DRIVER=systemd \
+CONTAINER_RUNTIME=remote \
+CONTAINER_RUNTIME_ENDPOINT='/var/run/crio/crio.sock  --runtime-request-timeout=15m' \
+./hack/local-up-cluster.sh
+```
+
+---
+
+# CRIO : nginx
+Now ./cluster/kubectl.sh create a deployment:
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: docker.io/nginx
+        ports:
+        - containerPort: 80
+```
+
+
+---
+
+And a service for it...
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: my-nginx
+```
+
+
+---
+
+1) What happens if an endpoint doesnt exist to the iptables rules?
+
+```
+-A KUBE-SERVICES -d 10.0.0.214/32 -p tcp -m comment
+--comment "default/my-nginx: has no endpoints"
+-m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+```
+
+Think about the kube-proxy.  UDP blackhole !!!
+
+2) Remember this?
+
+```
+-A DOCKER ! -i docker0 -p tcp -m tcp --dport 8080 -j DNAT --to-dest 172.17.0.2:80
+```
+
+## ... We all  bleed the same.
+
+---
+
+Scale up your replicas...
+
+Load balancing...
+
+increase probability every time you try a match... fall through to last one.
+```
+-A KUBE-SVC-BEP3 -m stat --mode rand --prob 0.3 -j KUBE-SEP-2GJEZCOEHW
+-A KUBE-SVC-BEP3 -m stat --mode rand --prob 0.5 -j KUBE-SEP-ZZ7SUJPI4
+-A KUBE-SVC-BEP3 -j KUBE-SEP-3MPNLP6DQU27LAMJ
+```
+
+I coulda thought of that?
+
+
+---
+
+Hows this all happening?
+
+kubectl-proxy logs (in /tmp)
+```
+I1020 17:54:02.163935   22325 proxier.go:664] Syncing iptables rules
+I1020 17:54:02.185580   22325 healthcheck.go:235] Not saving endpoints for unknown healthcheck "kube-system/kube-dns"
+I1020 17:54:02.185595   22325 healthcheck.go:235] Not saving endpoints for unknown healthcheck "default/my-nginx"
+I1020 17:54:02.185607   22325 bounded_frequency_runner.go:221] sync-runner: ran, next possible in 0s, periodic in 30s
+```
+
+---
+
+Helm to bootstrap istio.
+
+```
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh
+chmod 777 install-helm.sh ; ./install-helm.sh
+/usr/local/bin/helm  init
+```
+
+---
+
+Installing istio locally, super easy:
+
+```
+  curl -L https://git.io/getLatestIstio | sh - ; cd istio-1.0.2
+  export PATH=$PWD/bin:$PATH ; kubectl apply -f install/kubernetes/helm/istio/templates/crds.yaml
+  kubectl apply -f install/kubernetes/helm/istio/templates/crds.yaml
+  kubectl apply -f install/kubernetes/helm/istio/charts/certmanager/templates/crds.yaml
+  kubectl create namespace istio-system
+  /usr/local/bin/helm template --namespace=istio-system --set sidecarInjectorWebhook.enabled=true install/kubernetes/helm/istio > istio.yaml
+  kubectl create -f istio.yaml -n istio-system
+  kubectl label namespace default istio-injection=enabled
+```
+
+Scale down, scale up nginx... Now look at the iptables rules.  OMG
+      
+We all bleed the same.
+      
+      
+---
+
+
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
