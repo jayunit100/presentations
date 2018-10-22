@@ -199,7 +199,6 @@ spec:
         - containerPort: 80
 ```
 
-
 ---
 
 And a service for it...
@@ -218,7 +217,6 @@ spec:
   selector:
     run: my-nginx
 ```
-
 
 ---
 
@@ -269,6 +267,20 @@ I1020 17:54:02.185607   22325 bounded_frequency_runner.go:221] sync-runner: ran,
 
 ---
 
+How CNI sorta works
+
+https://github.com/containernetworking/cni/blob/master/SPEC.md
+See https://github.com/containernetworking/cni/blob/master/scripts/docker-run.sh
+for an implementation:
+
+```
+
+
+
+```
+
+---
+
 Helm to bootstrap istio.
 
 ```
@@ -295,6 +307,7 @@ Installing istio locally, super easy:
 Scale down, scale up nginx... Now look at the iptables rules.
 
 ---
+
 
 Add grafana (manually, depending on state of the istio docs)
 ```
