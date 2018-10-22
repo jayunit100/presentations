@@ -162,6 +162,23 @@ export PATH="/root/.gimme/versions/go1.11.1.linux.amd64/bin:${PATH}";
 
 ---
 
+```
+   48  yum install -y rsync
+   49  ./hack/local-up-cluster.sh
+   50  ~/bin/gimme 1.11.1
+   51  unset GOOS;
+   52  unset GOARCH;
+   53  export GOROOT='/root/.gimme/versions/go1.11.1.linux.amd64';
+   54  export PATH="/root/.gimme/versions/go1.11.1.linux.amd64/bin:${PATH}";
+   55  go version >&2;
+   56  export GIMME_ENV='/root/.gimme/envs/go1.11.1.linux.amd64.env';
+   57  ./hack/local-up-cluster.sh
+   58  hack/install-etcd.sh
+   59  export PATH=/home/vagrant/go/src/kubernetes/kubernetes/third_party/etcd:${PATH}
+```
+
+---
+
 # CRIO
 Set crio hints for hack local up cluster:
 
