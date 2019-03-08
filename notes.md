@@ -77,11 +77,11 @@ minikube-rbac                                          11d
 storage-provisioner                                    11d
 ```
 
-Example: Platform9 managed kubernetes
+Example: In a managed kubernetes distribution
 
 
 ```
-admin-and-pf9-access                                   13d
+admin-and-blahblah-access                                   13d
 apiproxy-access                                        13d
 cluster-admin                                          13d
 default-access                                         13d
