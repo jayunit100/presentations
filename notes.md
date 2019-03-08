@@ -60,7 +60,9 @@ cd kubernetes/
 $GOPATH/bin/kubetest --test --test_args="--ginkgo.focus=Secrets" --provider=skeleton
 ```
 
-# APIServer: ClusterRoleBindings
+# CLUSTER MODEL 
+
+## APIServer: ClusterRoleBindings
 
 Allow you to do anything.  Look at them, DELETE THEM !
 
@@ -153,12 +155,7 @@ Example log dataset for a long running cluster for auditing events:
 
 https://gist.githubusercontent.com/jayunit100/fdcd8b5edb3f6e38191da9f435ec9d09/raw/08a3f8951fa82b9d4253f6211f83b72427b9e1a3/
 
-## What to look for ? 
-
-
-
-
-# Modelling API server vulnerabilities w/ kube-hunter
+## Modelling API server vulnerabilities w/ kube-hunter
 ```
 [centos@ip-10-0-3-30 ~]$ sudo docker run -it --rm --network host aquasec/kube-hunter
 ```
@@ -180,4 +177,21 @@ ube-system/pods/metrics-server-v0.2.1-675ccb567f-x7fbt","uid":"d4d08bb2-3675-11e
 s
 ```
 
+# Application Model 
 
+## What are YOU doing wrong in your apps
+
+Most likely, this is where you'll have the most churn of vulnerabilities.
+Once you expose an endpoint: kubernetes can't necessarily help you very much.
+
+## Aqua 
+
+## Twistlock
+
+## Canonical Examples
+
+- Airflow
+- Apache
+- ...
+
+# Thanks !
