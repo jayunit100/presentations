@@ -150,16 +150,6 @@ as a standard API object.
 
 ## Building a webhook to model API usage in your cluster
 
-Golang example:
-
-```
-mkdir /root/bin ; curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
-chmod +x ~/bin/gimme
-~/bin/gimme 1.11 # Shows the env vars 
-eval "$(GIMME_GO_VERSION=1.11 gimme)" # sets them as default, now go is ready
-export GOPATH=/root/go/
-```
-
 Example log dataset for a long running cluster for auditing events:
 
 https://gist.githubusercontent.com/jayunit100/fdcd8b5edb3f6e38191da9f435ec9d09/raw/08a3f8951fa82b9d4253f6211f83b72427b9e1a3/
