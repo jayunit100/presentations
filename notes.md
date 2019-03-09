@@ -3,7 +3,10 @@
 ## Whats a threat model?
 
 ```
-Threat modeling is a process by which potential threats, such as structural vulnerabilities can be identified, enumerated, and prioritized – all from a hypothetical attacker’s point of view. 
+Threat modeling is a process by which potential threats, 
+such as structural vulnerabilities can be 
+identified, enumerated, and prioritized – 
+all from a hypothetical attacker’s point of view. 
 ```
 
 ```
