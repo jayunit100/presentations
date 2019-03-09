@@ -2,16 +2,22 @@
 
 ## Whats a threat model?
 
+According to wikipedia...
 ```
 Threat modeling is a process by which potential threats, 
 such as structural vulnerabilities can be 
 identified, enumerated, and prioritized – 
 all from a hypothetical attacker’s point of view. 
 ```
+More definition bikeshedding...
+```
+The purpose of threat modeling is to provide defenders 
+with a systematic analysis of 
+the probable attacker’s profile, the most likely attack vectors, and 
+the assets most desired by an attacker. 
+```
 
-```
-The purpose of threat modeling is to provide defenders with a systematic analysis of the probable attacker’s profile, the most likely attack vectors, and the assets most desired by an attacker. 
-```
+Specifically:
 
 - High level assets?
 - Where am i vulnerable? 
@@ -180,7 +186,20 @@ ube-system/pods/metrics-server-v0.2.1-675ccb567f-x7fbt","uid":"d4d08bb2-3675-11e
 s
 ```
 
-# Application Model 
+## So thats the kubernetes threat model
+
+From an attackers perspective: The API Server, and the Kubelet, represent
+to chatty components which can be influenced via API access over well known
+ports.
+
+Overall solution = SSL, enterprise support and patching.
+
+Now, lets look at the other, continuously shifting model: Your apps.
+
+# Application Level Threat Models 
+
+These are more likely to be exploited - especially if you're using a kubernetes distribution
+from an enterprise grade company. 
 
 ## What are YOU doing wrong in your apps
 
