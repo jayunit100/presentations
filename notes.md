@@ -142,7 +142,44 @@ API Server
 ### Example: Minikube
 
 ```
-{"kind":"Event","apiVersion":"audit.k8s.io/v1","level":"Metadata","auditID":"c6ddfa3d-953d-4aea-b36d-dd7f628bca8b","stage":"ResponseComplete","requestURI":"/api/v1/nodes/minikube/status?timeout=10s","verb":"patch","user":{"username":"system:node:minikube","groups":["system:nodes","system:authenticated"]},"sourceIPs":["127.0.0.1"],"userAgent":"kubelet/v1.13.3 (linux/amd64) kubernetes/721bfa7","objectRef":{"resource":"nodes","name":"minikube","apiVersion":"v1","subresource":"status"},"responseStatus":{"metadata":{},"code":200},"requestReceivedTimestamp":"2019-03-07T22:24:35.711681Z","stageTimestamp":"2019-03-07T22:24:35.722715Z","annotations":{"authorization.k8s.io/decision":"allow","authorization.k8s.io/reason":""}}
+{  
+   "kind":"Event",
+   "apiVersion":"audit.k8s.io/v1",
+   "level":"Metadata",
+   "auditID":"c6ddfa3d-953d-4aea-b36d-dd7f628bca8b",
+   "stage":"ResponseComplete",
+   "requestURI":"/api/v1/nodes/minikube/status?timeout=10s",
+   "verb":"patch",
+   "user":{  
+      "username":"system:node:minikube",
+      "groups":[  
+         "system:nodes",
+         "system:authenticated"
+      ]
+   },
+   "sourceIPs":[  
+      "127.0.0.1"
+   ],
+   "userAgent":"kubelet/v1.13.3 (linux/amd64) kubernetes/721bfa7",
+   "objectRef":{  
+      "resource":"nodes",
+      "name":"minikube",
+      "apiVersion":"v1",
+      "subresource":"status"
+   },
+   "responseStatus":{  
+      "metadata":{  
+
+      },
+      "code":200
+   },
+   "requestReceivedTimestamp":"2019-03-07T22:24:35.711681Z",
+   "stageTimestamp":"2019-03-07T22:24:35.722715Z",
+   "annotations":{  
+      "authorization.k8s.io/decision":"allow",
+      "authorization.k8s.io/reason":""
+   }
+}
 ```
 
 Note: https://github.com/kubernetes/kubernetes/pull/71230 at some point, creation of audit policies can be done and maintained in the cluster
