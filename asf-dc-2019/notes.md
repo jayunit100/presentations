@@ -1,35 +1,48 @@
-# Threat modelling in kubernetes cluster
+# Threat modelling in kubernetes clusters
+
+---
 
 ## Whats a threat model?
 
 According to wikipedia...
 ```
-Threat modeling is a process by which potential threats, 
-such as structural vulnerabilities can be 
-identified, enumerated, and prioritized – 
-all from a hypothetical attacker’s point of view. 
-```
-More definition bikeshedding...
-```
-The purpose of threat modeling is to provide defenders 
-with a systematic analysis of 
-the probable attacker’s profile, the most likely attack vectors, and 
-the assets most desired by an attacker. 
+Threat modeling is a process by which potential threats,
+such as structural vulnerabilities can be
+identified, enumerated, and prioritized –
+all from a hypothetical attacker’s point of view.
 ```
 
-Specifically:
+--- 
+More definition bikeshedding...
+
+The purpose of threat modeling is to 
+provide defenders with: 
+
+## The following
+
+- the probable attacker’s profile 
+
+- the most likely attack vectors  
+
+- the  assets most desired by an attacker
+
+---
+# Specifically
 
 - High level assets?
 - Where am i vulnerable? 
-- Most relevant threats? 
-- Attack vector that is unnoticed? 
-- The importance of performance.
+- Most relevant threats?
+- Attack vector that is unnoticed?
 
-## Who am I 
+--- 
+## Who am I
 
-- Kubernetes core contributor @ Red Hat (when it was wild and crazy)
-- Cloud Native Czar at Synopsys/Blackduck (security)
-- Now Kubernetes core engineer again : Platform9
+- @jayunit100
+- work on various ASF/CNCF stuff
+- Engineer at platform9 
+... check us out @platform9sys ...
+
+---
 
 ## Lets start threat modelling.
 
@@ -43,12 +56,12 @@ High level assets:
 
 In this talk: Focus on kubelets, API server, ETCD, Apps.
 
-## How do I know I haven't broken my cluster when securing it? 
+## How do I know I haven't broken my cluster when securing it?
 
 Run the Conformance tests!
 
 - Sonubuoy: https://scanner.heptio.com/
-- Kube-test manually: 
+- Kube-test manually:
 
 ```
 mkdir ~/bin
@@ -69,7 +82,7 @@ cd kubernetes/
 $GOPATH/bin/kubetest --test --test_args="--ginkgo.focus=Secrets" --provider=skeleton
 ```
 
-# CLUSTER MODEL 
+# CLUSTER MODEL
 
 ## APIServer: ClusterRoleBindings
 
@@ -88,13 +101,13 @@ minikube-rbac                                          11d
 storage-provisioner                                    11d
 ```
 
-EASIEST THING YOU CAN DO TO AVOID 
+EASIEST THING YOU CAN DO TO AVOID
 ROOT ACLs TO THE API SERVER IS PAY
 ATTENTION !
 
-Namespace your CRBs, so you know who made them and why ! 
+Namespace your CRBs, so you know who made them and why !
 
-See https://github.com/kubernetes/minikube/issues/3825 
+See https://github.com/kubernetes/minikube/issues/3825
 
 Example: In a managed kubernetes distribution
 
@@ -108,7 +121,7 @@ kube-proxy-access                                      13d
 kubelet-access                                         13d
 ```
 
-From the docs: 
+From the docs:
 
 ```
 	API servers create a set of default ClusterRole and ClusterRoleBinding objects. Many of these are  system: prefixed, which indicates that the resource is "owned" by the infrastructure. Modifications to these resources can result in non-functional clusters. One example is the system:node ClusterRole. This role defines permissions for kubelets. If the role is modified, it can prevent kubelets from working.
@@ -133,7 +146,7 @@ rules:
   - get
 ```
 
-God privileges look like this: 
+God privileges look like this:
 ```
 rules:
 - apiGroups:
@@ -173,7 +186,7 @@ API Server
 ### Example: Minikube
 
 ```
-{  
+{
    "kind":"Event",
    "apiVersion":"audit.k8s.io/v1",
    "level":"Metadata",
@@ -181,32 +194,32 @@ API Server
    "stage":"ResponseComplete",
    "requestURI":"/api/v1/nodes/minikube/status?timeout=10s",
    "verb":"patch",
-   "user":{  
+   "user":{
       "username":"system:node:minikube",
-      "groups":[  
+      "groups":[
          "system:nodes",
          "system:authenticated"
       ]
    },
-   "sourceIPs":[  
+   "sourceIPs":[
       "127.0.0.1"
    ],
    "userAgent":"kubelet/v1.13.3 (linux/amd64) kubernetes/721bfa7",
-   "objectRef":{  
+   "objectRef":{
       "resource":"nodes",
       "name":"minikube",
       "apiVersion":"v1",
       "subresource":"status"
    },
-   "responseStatus":{  
-      "metadata":{  
+   "responseStatus":{
+      "metadata":{
 
       },
       "code":200
    },
    "requestReceivedTimestamp":"2019-03-07T22:24:35.711681Z",
    "stageTimestamp":"2019-03-07T22:24:35.722715Z",
-   "annotations":{  
+   "annotations":{
       "authorization.k8s.io/decision":"allow",
       "authorization.k8s.io/reason":""
    }
@@ -214,9 +227,7 @@ API Server
 ```
 
 Note: https://github.com/kubernetes/kubernetes/pull/71230 at some point, creation of audit policies can be done and maintained in the cluster
-as a standard API object. 
-
-## Building a webhook to model API usage in your cluster
+as a standard API object.
 
 Example log dataset for a long running cluster for auditing events:
 
@@ -234,7 +245,8 @@ Scans for ports that have vulnerable information on them, for example, the kubel
 |   service: Kubelet API (readonly)
 |_  host: 10.0.3.30:10255
 ```
-Which has data about all your workloads !
+
+# Which has data about all your workloads ! ANYONE CAN SEE THIS!
 
 ```
 [centos@ip-10-0-3-30 ~]$ curl 10.20.5.1:10255/pods
@@ -243,8 +255,26 @@ ube-system/pods/metrics-server-v0.2.1-675ccb567f-x7fbt","uid":"d4d08bb2-3675-11e
 7761239","version":"v0.2.1"},"annotations":{"kubernetes.io/config.seen":"2019-02-22T16:41:17.609318905Z","kubernetes.io/config.source":"api","scheduler.alpha.kubernetes.io/critical-pod":""},"ownerReferences":[{"apiVersion":"exten
 s
 ```
+--- 
 
-## Runtime security at the App level
+The fix?
+
+Force the Kubelet to require HTTPS auth from metrics server.
+
+But you just broke metrics :(... 
+```
+ unable to fully collect metrics: [unable to fully scrape metrics from source kubelet_summary:ip-10-0-1-185.us-west-2.compute.internal: unable to fetch metrics from Kubelet ip-10-0-1
+-185.us-west-2.compute.internal 
+```
+
+- turn off insecure-tls
+- update the SANs 
+
+--- 
+
+# Runtime security at the App level
+
+NOT THAT HARD
 
 ```
 docker run -d --name db arminc/clair-db:2018-04-01
@@ -260,21 +290,19 @@ ports.  Overall solution = SSL, enterprise support and patching.
 Now, lets look at the other, continuously shifting model: Your apps.
 
 
-
-
-# The Authentication / Authorization Model
-
-
+--- 
 
 # Application Level Threat Model
 
 These are more likely to be exploited - especially if you're using a kubernetes distribution
-from an enterprise grade company. 
+from an enterprise grade company.
 
 ## What are YOU doing wrong in your apps
 
 Most likely, this is where you'll have the most churn of vulnerabilities.
 Once you expose an endpoint: kubernetes can't necessarily help you very much.
+
+---
 
 ### Fun part: Pick an image !
 
@@ -288,21 +316,40 @@ Container scanning
 Find all your images:
 
 ```
-	kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image} \n" 
+	kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image} \n"
 ```
+
+You could totally automate this into a workqueue: See blackjack's OpsSight product for details!
+--- 
 
 Run the clair-scanner against them:
+
+If running locally (on your Mac), just get the IP of your docker local:
+
 ```
-	docker pull apache/airflow:latest
-	./clair-scanner_darwin_amd64 --report=vulns.json  --threshold="Critical" --ip=192.168.20.194 apache/airflow:latest	
+Ifconfig | grep -B 4 -A 4 en0
 ```
 
-#### Apache Airflow: Sample output
+And then scan your bulbs:
+
+```
+	docker pull apache/airflow:latest
+	./clair-scanner_darwin_amd64 --report=vulns.json  --threshold="Critical" --ip=192.168.20.194 apache/airflow:latest
+```
+
+
+---
+
+## Apache Airflow: Sample output
 
 Apache Airflow:
 
 ```
-	"description": "An issue was discovered in shadow 4.5. newgidmap (in shadow-utils) is setuid and allows an unprivileged user to be placed in a user namespace where setgroups(2) is permitted. This allows an attacker to remove themselves from a supplementary group, which may allow access to certain filesystem paths if the administrator has used \"group blacklisting\" (e.g., chmod g-rwx) to restrict access to paths. This flaw effectively reverts a security feature in the kernel (in particular, the /proc/self/setgroups knob) to prevent this sort of privilege escalation."
+	"description": "An issue was discovered in shadow 4.5."
+```
+And it goes on... 
+```
+... newgidmap (in shadow-utils) is setuid and allows an unprivileged user to be placed in a user namespace where setgroups(2) is permitted. This allows an attacker to remove themselves from a supplementary group, which may allow access to certain filesystem paths if the administrator has used \"group blacklisting\" (e.g., chmod g-rwx) to restrict access to paths. This flaw effectively reverts a security feature in the kernel (in particular, the /proc/self/setgroups knob) to prevent this sort of privilege escalation."
 ```
 
 
