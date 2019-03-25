@@ -49,6 +49,8 @@ https://jayunit100asf.platform9.horse/clarity/index.html#/infrastructureK8s#clus
 
 `cat e2e-logs.txt`
 
+# First do no harm: Make sure you didnt break engineers and developers when you fixed security
+
 https://github.com/cncf/k8s-conformance/blob/master/v1.9/platform9/e2e.log
 https://github.com/cncf/k8s-conformance/blob/master/v1.9/platform9/junit_01.xml
 
@@ -87,6 +89,7 @@ Allow you to do anything.  Look at them, DELETE THEM !
 
 `kubectl get clusterrolebindings`
 
+```
 +------------------------------------+
 |              Minikube              |
 +------------------------------------+
@@ -95,6 +98,7 @@ Allow you to do anything.  Look at them, DELETE THEM !
 | kubeadm:node-autoapprove-bootstrap |
 | minikube-rbac                      |
 +------------------------------------+
+```
 
 --- 
 
