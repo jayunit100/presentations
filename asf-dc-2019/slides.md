@@ -16,7 +16,7 @@ https://jayunit100asf.platform9.horse/clarity/index.html#/infrastructureK8s#clus
 
 # Example: What does a real K8s patch look like? Patching runc
 
-`cat patch-cve.sh`
+`cat patch-cve.sh` bait-&-switch
 
 - *https://github.com/rancher/runc-cve/releases*
 - `--enable-admission-plugins=PodSecurityPolicy,NodeRestriction`
@@ -30,6 +30,9 @@ https://jayunit100asf.platform9.horse/clarity/index.html#/infrastructureK8s#clus
 "HTTPS is the universal firewall bypass protocol" - John Morello (CTO @ Twistlock)
 
 - in K8s num of IPTables rules ~ O(services)
+
+'Security at scale has to be transparent to applications' - Samrat Ray (Google)
+
 - SSL isn't *always* required (sidecars, prototypes)
 - CVE what? `exec` sometimes IS required (i.e. apache https!)
 - Distributing certs w/o rotating is dumb.
@@ -42,9 +45,6 @@ https://jayunit100asf.platform9.horse/clarity/index.html#/infrastructureK8s#clus
 
 - Pay someone: https://platform9.com/blog/the-seamless-upgrade-for-kubernetes-first-major-security-hole-cve-2018-1002105/
 - Go serverless+ingress level as a way to unify your threat model.
-
-'Security at scale has to be transparent to applications' - Samrat Ray (Google)
-
 - Automate tooling around citadel/zero-trust models
 
 `cat e2e-logs.txt`
@@ -68,24 +68,27 @@ There are ~ 130 Conformance tests / 30 minutes to run.
 
 # First do no harm: How to run the kubetests from source to target specific functionality
 
-`cat demo-e2e.sh`
+`cat e2e-demo.sh`
 
 Stuff you might have broke? The stuff in your threat model.
-
+Whats in your threat model to start with?  The stuff you think is important.
 
 Master:
 - ETCD ~ it has your entire cluster contents.
 - Kubelets ~ they run as root, and they generally have a docker daemon on them.
 - API Server ~ bringing an API server down could DoS any 'cloud native' app in a cluster.
+
 Apps:
 - Container exec
 - API calls that make apps do weird stuff
+
+DONT FORGET YOUR CONTAINER RUNTIME
 
 ---
 
 # Cluster Threat Model:  APIServer: ClusterRoleBindings
 
-Allow you to do anything.  Look at them, DELETE THEM !
+Allow you to do things in ANY NAMESPACE  Look at them, maybe delete them...
 
 `kubectl get clusterrolebindings`
 
@@ -99,7 +102,14 @@ Allow you to do anything.  Look at them, DELETE THEM !
 | minikube-rbac                      |
 +------------------------------------+
 ```
-
+If your building operators, aggregate to admin so your users dont
+screw up their rbac settings while installing your app...
+```
+labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+```
 --- 
 
 # ClusterThreatModel: RBAC: what does it need to do?
@@ -109,7 +119,7 @@ Allow you to do anything.  Look at them, DELETE THEM !
 - Read config maps
 - God privileges
 - rbac-to-allow (selinux ~ audit-to-allow)
-- helm PSP example
+- helm doesnt need god-privileges PSP example
 
 ---
  
@@ -122,19 +132,7 @@ API Server
 --audit-policy-file=/log/audit.json
 --audit-log-format=json
 ```
-
-# Example: Minikube ~ audit logs
-
-- Breifly: How minikube actually works, static pods
-
-`cat auditlogs-record.yml`
-
-- Note: https://github.com/kubernetes/kubernetes/pull/71230 at some point, creation of audit policies can be done and maintained in the cluster
-as a standard API object.
-
-- Example log dataset for a long running cluster for auditing events:
-
-- https://gist.githubusercontent.com/jayunit100/fdcd8b5edb3f6e38191da9f435ec9d09/raw/08a3f8951fa82b9d4253f6211f83b72427b9e1a3/
+Also, look at audit-to-rbac by jason ligget !
 
 ---
 
