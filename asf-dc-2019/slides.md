@@ -19,6 +19,8 @@ https://jayunit100asf.platform9.horse/clarity/index.html#/infrastructureK8s#clus
 `cat patch-cve.sh`
 
 - *https://github.com/rancher/runc-cve/releases*
+- `--enable-admission-plugins=PodSecurityPolicy,NodeRestriction`
+- Easier fix: `privileged: false,allowPrivilegeEscalation: false, runAsUser:rule: 'MustRunAsNonRoot'`
 
 --- 
 # First do no harm: Build a threat model
@@ -117,7 +119,9 @@ API Server
 --audit-log-format=json
 ```
 
-# Example: Minikube
+# Example: Minikube ~ audit logs
+
+- Breifly: How minikube actually works, static pods
 
 `cat auditlogs-record.yml`
 
@@ -187,7 +191,7 @@ velocity.
 
 --- 
 
-# How to continously monitor all applications in your k8s cluster.
+# How to continously build a scan queue that monitors all applications in your k8s cluster.
 
 `cat build-scan-q.sh`
 
