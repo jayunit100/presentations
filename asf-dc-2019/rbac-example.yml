@@ -44,3 +44,13 @@ rules:
   verbs: ["*"]
 ```
 
+```
++------------------------------------+
+|              Minikube              |
++------------------------------------+
+| cluster-admin                      |
+| kubeadm:kubelet-bootstrap          |
+| kubeadm:node-autoapprove-bootstrap |
+| minikube-rbac                      |
++------------------------------------+
+```
