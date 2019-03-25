@@ -44,7 +44,10 @@ rules:
   verbs: ["*"]
 ```
 
-```
+  Minikube is fixing this: dont make 
+  clusterroles that dont have clear names/roles
+  a:b:c:d 
+  ```
 +------------------------------------+
 |              Minikube              |
 +------------------------------------+

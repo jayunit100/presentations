@@ -1,5 +1,15 @@
 # Threat modelling in kubernetes clusters ++
 
+## Reach out + thanks to the ASF
+
+-  https://kubernetes.io/community/
+-  platform9.com / @platform9sys 
+-  jay@apache.org / @jayunit100 
+
+---
+
+# Two qoutes
+
 - "HTTPS is the universal firewall bypass protocol" - John Morello (CTO @ Twistlock)
 - "Security at scale has to be transparent to applications" - Samrat Ray (PM @ Google)
 
@@ -63,8 +73,7 @@ First do no harm: Make sure you didnt break engineers and developers when you fi
 - Run kube-hunter or aqua or opssight or twistlock or whatever 
 - Lock something down
 - Run the conformance tests `https://scanner.heptio.com/`
-- Run a kubetest variant, even easier, like this
-
+- Run a kubetest variant, even easier... 
 There are ~ 130 Conformance tests / 30 minutes to run.
 
 --- 
@@ -78,11 +87,11 @@ Whats in your threat model to start with?  The stuff you think is important.
 
 APIServer,ETCD,Kublet,Secrets,Network DS,Volumes, EmptyDir,VolPerms,...
 
----
+--- 
+App security: ++
 
-Apps: ++
-
-- Container exec
+- Twistlock, Blackduck, Claire
+- Watch out for Container exec + consider scratch
 - API calls that make apps do weird stuff
 *Application security*
  
@@ -95,7 +104,6 @@ Apps: ++
 - Twistlock : Anomolous behavior, listening on sockets, weird files.
 
 ---
-
 *Cluster Threat Model:  APIServer: ClusterRoleBindings* ++
 
 `cat rbac-example.yml`
@@ -194,8 +202,10 @@ Solution:
 
 ---
 
-Summary: kubernetes threat model assets ==  ++
+Kubernetes threat model assets ==  ++
  
+- RBAC
+- Volumes
 - ETCD (everything)
 - API Server (get metadata about whats running, logs, exec)
 - Services and NodePorts
@@ -233,7 +243,7 @@ Blackduck Perceptor: Building an infinite scan queue
 
 --- 
 
-Blackduck perceptor: Continous scanning of images.
+Build your own container scanning platform: Perceptor.
 
 - pod-perceivers (k8s)
 - image-perceivers (openshift)
@@ -246,7 +256,9 @@ or node labels:
 
 --- 
 
-```
+Example of how to localize scan locality
+
+```yaml
 spec:
   affinity:
     nodeAffinity:
