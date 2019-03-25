@@ -1,0 +1,46 @@
+Read config maps
+
+```
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        rules:
+        - apiGroups:
+          - ""
+          resourceNames:
+          - cluster-info
+          resources:
+          - configmaps
+          verbs:
+          - get
+```
+
+Do anything
+
+```
+        rules:
+        - apiGroups:
+          - '*'
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        - nonResourceURLs:
+          - '*'
+          verbs:
+          - '*'
+```
+
+Helm for a single namespace:
+
+```
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tiller-manager
+  namespace: tiller-world
+rules:
+- apiGroups: ["", "batch", "extensions", "apps"]
+  resources: ["*"]
+  verbs: ["*"]
+```
+
