@@ -102,7 +102,11 @@ however they want to.
 
 ## This is what I propose as the future of bigtop.
 
-## Minio with Presto
+- Warehousing: HBase, and Presto
+- Streaming: Kafka, Spark
+- Workflow: Kafka, HBase, Nifi, Zepplin
+
+## Warehousing: Minio with Presto
 
 Deployment archiecture w/ Presto
 ```
@@ -131,7 +135,7 @@ Deployment archiecture w/ Presto
  +-----------------+                             
 ```
 
-## Spark with Zepplin
+## Notebooks: Spark with Zepplin
 
 Normally... 
 
@@ -149,4 +153,46 @@ Normally...
 ```
 
 
--
+### with these files modified by puppet/shell/manually...
+
+```
+├── README.md
+├── core-site.xml (s3a.filesystem minio urls)
+├── log4j.properties
+├── spark-defaults.conf
+├── spark-deployment.yaml
+└── spark-env.sh
+```
+
+For bigtop, configmapify these files, with seeded attributes for accessing the default
+object store.
+
+## HBase, Kafka, Nifi, Zookeeper
+
+For production clusters, the availability of ZK as a single service
+thats heavily resourced against durable storage is important.  Otherwise,
+multiple ZK clusters and PVs might need to be looked at in an outage,
+and you may have an exorbitantly high cost for a new ZK cluster for each 
+service.
+
+... So,...
+ 
+
+```                                                                 
++-----------------------------------+                               
+|                                   |                               
+|  Hbase  -----> ZK                 |                               
+|  Kafka ------> ZK                 |                               
+|  Nifi -------> ZK                 |                               
+|                                   |                               
+|                                   |                               
+|    Unify the zookeeper cluster,   |                               
+|    inject it via configmap        |                               
+|    to Hbase, Kafka, Nifi.         |                               
+|                                   |                               
+|    ..Finally, persistent volumes..|                               
+|                                   |                               
++-----------------------------------+                               
+```                                 
+
+
