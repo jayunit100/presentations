@@ -195,4 +195,62 @@ service.
 +-----------------------------------+                               
 ```                                 
 
+### Putting it all together
+
+Ultimately, the future of BigTop's architecture
+might look something like this.
+
+```
+    +-------------------------+                                       
+    |                         |                                       
+    |                         |                                       
+    |                         |                                       
+    |                         |                                       
+    | minio                   |                                       
+    | /data01/ (50G)          |                                       
+    | ./minio server /data01/.                +-------------------+   
+    |                         |+------------> |   Ingress(nginx)  |   
+    |                         |               |                   |   
+    +-------------------------+               |                   |   
+                                              |                   |   
+   +-----------------++---------------------> +-------------------+   
+   |                 |                                     ^    ^     
+   |                 |                                     |    |     
+   |                 |                                     |    |     
+   |                 |                                     |    |     
+   | presto          |                                     |    |     
+   | /               | <-- also, hive.metastore.uri        |    |     
+   |   minio.        |                                     |    |     
+   |     properties  |                                     |    |     
+   |       hive.s3.* |                                     |    |     
+   +-----------------+                                     |    |     
+                                                           |    |     
+  +------------------++------------------+                 |    |     
+  |  VM              || VM               | ----------------+    |     
+  |                  ||                  |                      |     
+  |  Spark           || Spark            | ├── README.md        |     
+  |     master url   ||   slaves         | ├── core-site.xml    |     
+  |     <- workers                       | ├── log4j.properties |     
+  |                  ||                  | ├── spark-defaults.conf    
+  |                  ||                  | ├── spark-deployment.yaml  
+  |                  ||                  | └── spark-env.sh     |     
+  +------------------++------------------+                      |     
+                                                                |     
+ +--------------------------------------+                        |     
+ |                                      |                        |     
+ |  Hbase  -----> ZK                    |                        |     
+ |  Kafka ------> ZK                    | -----------------------+     
+ |  Nifi -------> ZK                    |                              
+ |                                      |                              
+ |                                      |                              
+ |    Unify the zookeeper cluster,      |                             +
+ |    inject it via configmap           |                              
+ |    to Hbase, Kafka, Nifi.            |                              
+ |                                      |                              
+ |    ..Finally, persistent volumes..   |                          +   
+ |                                      |                              
+ +--------------------------------------+                              
+```
+
+
 
