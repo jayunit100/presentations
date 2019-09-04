@@ -1,4 +1,4 @@
-# Threat modelling in kubernetes clusters ++
+#  A Community for testing the Cloud Native Analytics Stack. ++
 
 ## Reach out + thanks to the ASF
 
@@ -53,11 +53,9 @@ Proprietary Big Data clouds : Can we compete with them ?
 Look at a *very* prototypey sketch of what BigTop could be: A batteries included
 alternative to PBDCs.
 
-## No more RPM/Debs
+## We'll start sating *NO* to old tools
 
-- Use *public docker image* for packaging. 
-
-## No more old tools
+Let old things die. 
 
 - Drill, Hue, Puppet, Oozie, Pig....  Who cares?  People using these tools can 
 maintain them on their own - and the BigTop Community isnt big enough to continue
@@ -65,17 +63,35 @@ integration testing them.,, and vendors simple arent helping us.
 - Build, Deployment, RPM, and Debian == 50% of all bigtop issues.  Lets nix them.
 - Focus on a small stack that provides immediate value and build a new community.
 
+## No more RPM/Debs
+
+- Use *public docker image* for packaging.
+- Support Deb/RPM alike via the CRI.
+- Multiple implementations available: Docker not a requirement.
+- Tarballs - the easiest way *ever* to run hadoop, spark, ... ARE BACK!
 
 # What do Data scientists do ?
 
 - In memory compute
 - Ad hoc querying
 - Cheap object stores
-- Batteries included deployments.
+- Batteries included deployments
+- Infrastructure taken for granted
 
 They DONT do : Terraform, Puppet, Ansible, Maven, ... 
 
-.. Lets give them something they can use.
+.. Lets give them something they can use... Kubernetes
+
+# What is Kubernetes? 
+
+- An API for cloud functionality that just works, anywhere, and has push button deployments in
+every public cloud.
+- An autoscaler, service discovery mechanism, storage provisioner, release and upgrade manager
+- Oh yeah and its also a container orchestrator.
+
+Its essentially the entire operations aspect for any app - commoditized into an API.
+
+No *actual* intro to K8s will happen here, since there are 1000s online.
 
 # K8s doesnt have an open source, credible  bigdata or datalake story.  Lets give it one.
 
