@@ -4,7 +4,11 @@
 
 -  https://kubernetes.io/community/
 -  jay@apache.org / @jayunit100 
+-  sid@minio.io / @wlan0
+- ... 
 
+
+### SID Feel free to add change edit whatever, this is v0 of the slides this far.
 ---
 
 # A qoute about Packaging
