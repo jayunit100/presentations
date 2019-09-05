@@ -114,34 +114,52 @@ standard for open source PV provisioning.
 
 # Spark: How we should do ConfigMaps
 
-- ConfigMaps injected for *all* files that users can change
+static:
+- ConfigMaps injected for *all* files that users can change.
+- helm/stable == 1.5, we should be on 2.x at least (microsoft/helm has 2x w/ zepplin)
+dynamic:
+- cloud native driver + native zepplin : Spark operator from google.
+- Someone needs to own the native tranlation... https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/issues/531 / https://issues.apache.org/jira/browse/SPARK-24432.
 
-# Nifi + Kafka: How we should handle state
+# Statefull services: Nifi, HBase, Kafka -> Zk
+
+- stable/helm charts are usable as is.
+- 
+How we should handle state
 
 - Reuse Zookeeper or other bookeeping stuff, minimize resource usage and have
 thoughtful DR story for CP data stores.
 
+For production clusters, the availability of ZK as a single service
+thats heavily resourced against durable storage is important.  Otherwise,
+multiple ZK clusters and PVs might need to be looked at in an outage,
+and you may have an exorbitantly high cost for a new ZK cluster for each 
+service.
+
+... So,...
+ 
+
+```                                                                 
++-----------------------------------+                               
+|                                   |                               
+|  Hbase  -----> ZK                 |                               
+|  Kafka ------> ZK                 |                               
+|  Nifi -------> ZK                 |                               
+|                                   |                               
+|                                   |                               
+|    Unify the zookeeper cluster,   |                               
+|    inject it via configmap        |                               
+|    to Hbase, Kafka, Nifi.         |                               
+|                                   |                               
+|    ..Finally, persistent volumes..|                               
+|                                   |                               
++-----------------------------------+                               
+```                                 
+
 # Minio + Presto : Give users a warehouse
 
-- People need to do ad hoc querying.  Package Minio and PResto together for people to use
+People need to do ad hoc querying.  Package Minio and PResto together for people to use
 as a one-stop warehouse for querying data at any scale.
-
-# Result: 
-
-An analytics distro that is native to kubernetes, which can be use to cluster, query, and store
-pedascalable data, which also has a single, opinionated model for deploying and running spark.
-
-## Possibly use the spark operator here.
-
-# Ok ! So lets start going through the code... and do some demos.
-
-- Kubernetes reference installer: Raw Kubeadm "master" and "slave" scripts That anyone can just run
-however they want to.
-
-
-## Warehousing: Minio with Presto
-
-Deployment archiecture w/ Presto
 ```
 +------------------------+                      
  |                        |                      
@@ -167,6 +185,20 @@ Deployment archiecture w/ Presto
  |       hive.s3.* |                             
  +-----------------+                             
 ```
+
+# Result: 
+
+An analytics distro that is native to kubernetes, which can be use to cluster, query, and store
+pedascalable data, which also has a single, opinionated model for deploying and running spark.
+
+## Possibly use the spark operator here.
+
+# Ok ! So lets start going through the code... and do some demos.
+
+- Kubernetes reference installer: Raw Kubeadm "master" and "slave" scripts That anyone can just run
+however they want to.
+
+
 
 ## Notebooks: Spark with Zepplin
 
@@ -201,34 +233,6 @@ ALT: Spark operator with autoscaling ?  See SPARK-24432.
 
 For bigtop, configmapify these files, with seeded attributes for accessing the default
 object store.
-
-## HBase, Kafka, Nifi, Zookeeper
-
-For production clusters, the availability of ZK as a single service
-thats heavily resourced against durable storage is important.  Otherwise,
-multiple ZK clusters and PVs might need to be looked at in an outage,
-and you may have an exorbitantly high cost for a new ZK cluster for each 
-service.
-
-... So,...
- 
-
-```                                                                 
-+-----------------------------------+                               
-|                                   |                               
-|  Hbase  -----> ZK                 |                               
-|  Kafka ------> ZK                 |                               
-|  Nifi -------> ZK                 |                               
-|                                   |                               
-|                                   |                               
-|    Unify the zookeeper cluster,   |                               
-|    inject it via configmap        |                               
-|    to Hbase, Kafka, Nifi.         |                               
-|                                   |                               
-|    ..Finally, persistent volumes..|                               
-|                                   |                               
-+-----------------------------------+                               
-```                                 
 
 ### Putting it all together
 
