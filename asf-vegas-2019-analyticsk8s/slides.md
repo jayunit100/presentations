@@ -31,8 +31,8 @@ From our website... https://bigtop.apache.org/
 
 Cambrian explosion in bigdata tools... 
 
-- When BigData was overfunded... there was money to waste.
-- Remeber Cascalog, Cascading, DSL's for Mapreduce, Hbase on HDFS, ...
+- When BigData was overfunded... there was money to waste.. people made their own tools.
+- Remeber Cascalog, Cascading, DSL's for Mapreduce, Hbase on HDFS ?
 - Pig, Hive, MR 1, MR2, ... growth of tools with integration problem.
 - Mahout on Yarn.
 - Hive interop w/ Hadoop.
@@ -42,11 +42,12 @@ Cambrian explosion in bigdata tools...
 ## What about now? 
 
 The BigData trough of Disillusionment is here.
-- Reduced commit frequency to bigtop and other projects.
+- Reduced relevance of hadoop, hive, pig, mahout, hbase, other projects.
 - Spark commoditized Batch SQL and simple streaming.
 - HDFS isnt the only data source, and IoT means it never will be.
 - Integration with infrastructure,clouds, and a cheap alt. to EMR/BigQuery is what
 people need.
+- Data Science is getting more demanding and more integral to everyday apps.
 - Dynamic data lakes and tools for building real time analytics pipelines.
 - Ultimately Reasoning about dataflow with nifi is needed.
 
@@ -57,9 +58,9 @@ Proprietary Big Data clouds : Can we compete with them ?
 Look at a *very* prototypey sketch of what BigTop could be: A batteries included
 alternative to PBDCs.
 
-## We'll start sating *NO* to old tools
+## We'll start saying *NO* to old tools
 
-Let old things die. 
+Its time to let old things die. 
 
 - Drill, Hue, Puppet, Oozie, Pig....  Who cares?  People using these tools can 
 maintain them on their own - and the BigTop Community isnt big enough to continue
@@ -67,10 +68,13 @@ integration testing them.,, and vendors simple arent helping us.
 - Build, Deployment, RPM, and Debian == 50% of all bigtop issues.  Lets nix them.
 - Focus on a small stack that provides immediate value and build a new community.
 
-## No more RPM/Debs
+## Bigtop Packages Hadoop .. Who cares :) ? 
+
+We don't need RPMs and DEBs.  We need tarballs and docker images.
+The age of the mutable linux server is ending.
 
 - Use *public docker image* for packaging.
-- Support Deb/RPM alike via the CRI.
+- Support any *NIX distro, alike via the Docker and the CRI.
 - Multiple implementations available: Docker not a requirement.
 - Tarballs - the easiest way *ever* to run hadoop, spark, ... ARE BACK!
 
@@ -84,9 +88,11 @@ integration testing them.,, and vendors simple arent helping us.
 
 They DONT do : Terraform, Puppet, Ansible, Maven, ... 
 
-.. Lets give them something they can use... Kubernetes
+.. Lets give them something they can use... *Kubernetes*
 
 # What is Kubernetes? 
+
+You probably already know.  If not, I'll wing it and tell you.
 
 - An API for cloud functionality that just works, anywhere, and has push button deployments in
 every public cloud.
@@ -106,25 +112,32 @@ makes data governance and K8s analytics easy for anyone.
 standard for open source PV provisioning.
 - Bigtop should do the same.
 
+# Spark: How we should do ConfigMaps
 
-# Ok ! So lets start going through the code...
+- ConfigMaps injected for *all* files that users can change
+
+# Nifi + Kafka: How we should handle state
+
+- Reuse Zookeeper or other bookeeping stuff, minimize resource usage and have
+thoughtful DR story for CP data stores.
+
+# Minio + Presto : Give users a warehouse
+
+- People need to do ad hoc querying.  Package Minio and PResto together for people to use
+as a one-stop warehouse for querying data at any scale.
+
+# Result: 
+
+An analytics distro that is native to kubernetes, which can be use to cluster, query, and store
+pedascalable data, which also has a single, opinionated model for deploying and running spark.
+
+## Possibly use the spark operator here.
+
+# Ok ! So lets start going through the code... and do some demos.
 
 - Kubernetes reference installer: Raw Kubeadm "master" and "slave" scripts That anyone can just run
 however they want to.
 
-
-1. Dynamic Storage, NFS, and Host Path docs and testing
-2. Helm charts that we regularly test, and run real workloads against.
-3. Yamls where we cant - with *manual* deployment instructions.
-  - Automation isnt worth it here.  What the community needs is integrated recipes that are hackable,
-    not a proscriptive distribution that is overspecified.
-4. Intro to how we'll use Kustomize + ConfigMaps for injecting into spark, nifi, presto, etc...
-
-## This is what I propose as the future of bigtop.
-
-- Warehousing: HBase, and Presto
-- Streaming: Kafka, Spark
-- Workflow: Kafka, HBase, Nifi, Zepplin
 
 ## Warehousing: Minio with Presto
 
@@ -171,6 +184,8 @@ Normally...
 |                  ||                  |         
 +------------------++------------------+         
 ```
+
+ALT: Spark operator with autoscaling ?  See SPARK-24432.
 
 
 ### with these files modified by puppet/shell/manually...
