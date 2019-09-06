@@ -120,6 +120,8 @@ static:
 dynamic:
 - cloud native driver + native zepplin : Spark operator from google.
 - Someone needs to own the native tranlation... https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/issues/531 / https://issues.apache.org/jira/browse/SPARK-24432.
+- Best practices around scratch dirs: Don't use rootfs (kubelet emptyDir default)!
+
 
 # Statefull services: Nifi, HBase, Kafka -> Zk
 
