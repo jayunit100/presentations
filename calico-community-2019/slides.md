@@ -172,3 +172,11 @@ cd calico/hack/development-environment/
 vagrant up
 ```
 
+# TODO
+
+- airgapped builds: can we do them  ?
+- submodules / federated repo, should we curate one in upstream ? 
+- reduce code duplication across makefiles --- is there a possible way we can have a global makefile that
+does the mod edits and other things generically ?
+- map out / make explicit the dependencies of libraries etc (i.e. pod2daemon, libcalico-go vs node, kubecontrollers, calicoctl).
+
