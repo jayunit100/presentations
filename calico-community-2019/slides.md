@@ -50,6 +50,7 @@ In a running k8s cluster, you'll see the following images running for calico.
 - `RELEASE_REPOS=felix typha kube-controllers calicoctl cni-plugin app-policy pod2daemon node` (from the Calico Makefile).
 - cni-plugin -> libcalico
 - node -> felix, libcalico
+- felix -> pod2daemon, libcalico
 - typha -> libcalico (optional)
 - kubecontrollers -> libcalico
 
@@ -147,18 +148,13 @@ Airgapped builds or building from source for development use this.
 
 PS Thanks to Casey and Rafeal for helping me get this logic sorted out. Turned out there were some upstream ordering bugs in the makefiles we had to fix.
 ```
-ifdef LOCAL_BUILD
-EXTRA_DOCKER_ARGS+=-v $(CURDIR)/../libcalico-go:/go/src/github.com/projectcalico/libcalico-go:rw
 local_build:
-	echo "listing contents libcalico-go ... must be one level up .......will fail if this fails !!!!"
-	ls -altrh $(CURDIR)/../libcalico-go
 	$(DOCKER_RUN) $(CALICO_BUILD) go mod edit -replace=github.com/projectcalico/libcalico-go=../libcalico-go
-else
-local_build:
-	-$(DOCKER_RUN) $(CALICO_BUILD) go mod edit -dropreplace=github.com/projectcalico/libcalico-go
-endif
+	$(DOCKER_RUN) $(CALICO_BUILD) go mod edit -replace=github.com/projectcalico/confd=../confd
+	$(DOCKER_RUN) $(CALICO_BUILD) go mod edit -replace=github.com/projectcalico/felix=../felix
 ```
 
+How you build calico from source - enabling LOCAL_BUILD, so that it doesnt pull stuff from the internet.
 ## Vagrantfile useage for simple dev scenario
 
 ```
