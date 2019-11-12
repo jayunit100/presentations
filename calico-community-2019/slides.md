@@ -172,6 +172,45 @@ cd calico/hack/development-environment/
 vagrant up
 ```
 
+## Kind alternative, work in progress
+
+```
+#!/bin/bash
+function build() {
+    sudo apt install make
+    pushd ~/calico_all/calico/
+        sudo make dev-image REGISTRY=cd LOCAL_BUILD=true
+        sudo make dev-manifests REGISTRY=cd
+    popd
+}
+function install_k8s() {
+    sudo kind create cluster --config calico-conf.yml
+    export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+    sudo chmod 755 ~/.kube/kind-config-kind
+    until kubectl cluster-info;  do
+        echo "`date`waiting for cluster..."
+        sleep 2
+    done
+}    
+function install_calico() {
+    kubectl get pods
+    pushd ~/calico_all/calico/_output/dev-manifests
+            kubectl apply -f ./calico.yaml 
+            kubectl get pods -n kube-system
+    popd
+    sleep 5 ; kubectl -n kube-system set env daemonset/calico-node FELIX_IGNORELOOSERPF=true
+    sleep 5 ; kubectl -n kube-system get pods | grep calico-node
+    echo "will wait for calico to start running now... "
+    while true ; do
+        kubectl -n kube-system get pods
+        sleep 3
+    done
+}
+build
+install_k8s
+install_calico
+```
+
 # TODO
 
 - airgapped builds: can we do them  ?
