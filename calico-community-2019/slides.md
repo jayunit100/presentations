@@ -47,10 +47,12 @@ In a running k8s cluster, you'll see the following images running for calico.
 
 ## What components does calico build ? 
 
+Roughly, don't qoute me on this... 
+
 - `RELEASE_REPOS=felix typha kube-controllers calicoctl cni-plugin app-policy pod2daemon node` (from the Calico Makefile).
 - cni-plugin -> libcalico
-- node -> felix, libcalico
-- felix -> pod2daemon, libcalico
+- node -> felix, libcalico, confd (calico specific fork )
+- felix -> pod2daemon, libcalico, confd (calico specific fork) 
 - typha -> libcalico (optional)
 - kubecontrollers -> libcalico
 
