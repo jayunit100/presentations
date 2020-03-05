@@ -69,10 +69,17 @@ kubectl exec -t -i zb-659ddf6cd9-fdpqs -c c80 -n z -- wget --spider --tries 4 --
 - Run it:
 
 ```
-kubectl create clusterrolebinding netpol --clusterrole=cluster-admin --serviceaccount=kube-system:netpol
-kubectl create sa netpol -n kube-system
-kubectl create -f https://raw.githubusercontent.com/vmware-tanzu/antrea/master/hack/netpol/install-latest.yml -n kube-system 
-kubectl get pods -n kube-system # <- results will be in the netpol pod
+➜  kind git:(master) ✗ kubectl create clusterrolebinding netpol --clusterrole=cluster-admin --serviceaccount=kube-system:netpol
+
+➜  kind git:(master) ✗ kubectl create sa netpol -n kube-system
+
+➜  kind git:(master) ✗ kubectl create -f https://raw.githubusercontent.com/vmware-tanzu/antrea/master/hack/netpol/install-latest.yml -n kube-system
+
+➜  kind git:(master) ✗ kubectl get pods -n kube-system # <- results will be in the netpol pod
+
+➜  kind git:(master) ✗ kubectl get jobs -n kube-system 
+NAME     COMPLETIONS   DURATION   AGE
+netpol   1/1           6m6s       55m
 ```
 
 ## Next steps
