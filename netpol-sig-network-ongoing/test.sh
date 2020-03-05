@@ -1,6 +1,3 @@
-kubectl create clusterrolebinding netpol --clusterrole=cluster-admin --serviceaccount=kube-system:netpol
-kubectl create sa netpol -n kube-system
-
 export KUBECONFIG=`kind get kubeconfig-path --name=calico-test` 
 
 ######################## 
