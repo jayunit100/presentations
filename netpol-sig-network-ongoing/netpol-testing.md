@@ -12,6 +12,7 @@
 
 - Multiple CNIs, each w/ policy specific issues (weave, calico, antrea, 'x' dataplane, 'y' config, 'z' policy provider)
 - i.e. GKE with Calico for policy or Calico w/ or w/o XDP enabled, etc.
+- i.e. OPA's overlaying on top of other CNI providers
 - A hardened upstream diagnostic test which all providers can run, rely on, derive value from.
 
 Set a standard for continously running, easily adaptable network policy semantics and API validation that is readily adoptable by cloud providers providing confidence to users that all networkpolicy semantics work well at any scale.
