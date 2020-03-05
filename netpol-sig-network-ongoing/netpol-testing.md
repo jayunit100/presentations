@@ -1,5 +1,7 @@
 # NetworkPolicy testing framework with truth tables
 
+[![asciicast](https://asciinema.org/a/qKTLNwD0l577AQOLsWI4sR5tV.svg)](https://asciinema.org/a/qKTLNwD0l577AQOLsWI4sR5tV)
+
 - Incompleteness: The tests API should be written to support increasing test coverage over time
 - Understandability: The tests should be easy to read and help interpret policy semantics
 - Dynamic scale: The test API be declarative enough to support larger scale tests for enterprises/cloud providers
@@ -15,6 +17,7 @@ Set a standard for continously running, easily adaptable network policy semantic
 Excerpt from our existing KEP, living https://github.com/kubernetes/enhancements/pull/1568.
 These tests work by probing all 81 possible connections between containers, ( 3 namespaces, 3 containers
 identical in each namespace).
+
 
 ```
 +-------------------------------------------------------------------------+
