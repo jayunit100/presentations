@@ -23,6 +23,25 @@ Excerpt from our existing KEP, living https://github.com/kubernetes/enhancements
 These tests work by probing all 81 possible connections between containers, ( 3 namespaces, 3 containers
 identical in each namespace).
 
+```
++-------------------------------------------------------------------+
+| +------+    +-------+   Figure 1a: The NetworkPolicy Tests        | TODO: maybe include YAML examples side-by-side
+| |      |    |       |   current logical structure only verifies   |       visual nomenclature (i.e., cA -> podA)
+| |  cA  |    |  cB   |   one of many possible network connectivity |
+| |      |    |       |   requirements. Pods and servers are both   |
+| +--+---+    +--X----+   in the same node and namespace.           |
+|    |           X                                                  |
+|    |           X                                                  |
++----v-----------X+---+                                             |
+||     server         |    Note that the server runs in the         |
+||     80, 81         |    "framework" namespace, and so we don't   |
+||                    |    draw that namespace specifically here,   |
+||                    |    as that namespace is an e2e default.     |
+|---------------------+                                             |
++-------------------------------------------------------------------+
+```
+
+whole matrix ==> 
 
 ```
 +-------------------------------------------------------------------------+
