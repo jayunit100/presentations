@@ -89,7 +89,7 @@ kubectl exec -t -i zb-659ddf6cd9-fdpqs -c c80 -n z -- wget --spider --tries 4 --
 
 ## Current state
 
-- An implementation can be found [here](https://github.com/vmware-tanzu/antrea/tree/master/hack/netpol).
+- An implementation can be found https://github.com/vmware-tanzu/antrea/tree/master/hack/netpol.
 - Runs about 14 test cases in about 10mins.
 - In comparision, e2e tests focused on NetworkPolicy takes close to an hour.
 - Recently integrated with Antrea CI.
